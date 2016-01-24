@@ -1,0 +1,15 @@
+{
+  "title": "Firefox Serviio",
+  "name": "ffserviio",
+  "version": "0.0.1",
+  "description": "A basic add-on",
+  "main": "index.js",
+  "author": "Sorin Burjan",
+  "engines": {
+    "firefox": ">=38.0a1"
+  },
+  "license": "LGPLv3",
+  "keywords": [
+    "jetpack"
+  ]
+}

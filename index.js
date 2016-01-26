@@ -1,8 +1,7 @@
-//var buttons   = require('sdk/ui/button/action')
 var tabs      = require("sdk/tabs")
 var data      = require('sdk/self').data
 var clipboard = require('sdk/clipboard')
-var pageMod   = require("sdk/page-mod");
+var pageMod   = require("sdk/page-mod")
 
 pageMod.PageMod({
   include: "*.youtube.com",
@@ -11,16 +10,15 @@ pageMod.PageMod({
             data.url('content-script.js')],
   //contentScriptWhen: 'end',
   onAttach: function(worker) {
-    worker.port.emit("message", 'Message from the add-on');   
+    worker.port.emit("message", 'Message from the add-on')
     worker.port.on('copyToClipboard', function(serviioURL){
-    console.log('index.js - copyToClipboard - Received URL', serviioURL);
-    clipboard.set(serviioURL);
+    console.log('index.js - copyToClipboard - Received URL', serviioURL)
+    clipboard.set(serviioURL)
     });
 
   }
 });
 
-//tabs.on('load', checkTab);
 tabs.open('https://www.youtube.com/user/catmusicoffice/videos')
 tabs.open('https://www.youtube.com/playlist?list=PLCzQ2UHQfewRpVrmLIEy_Dh98sEU2x0o6')
 tabs.open('https://www.youtube.com/user/erlazantivirus/videos')

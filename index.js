@@ -8,11 +8,11 @@ pageMod.PageMod({
   contentScriptFile: [
             data.url('jquery-2.2.0.min.js'),
             data.url('content-script.js')],
-  //contentScriptWhen: 'end',
+  contentScriptWhen: 'end',
   onAttach: function(worker) {
-    worker.port.emit("message", 'Message from the add-on')
+    worker.port.emit('init')
     worker.port.on('copyToClipboard', function(serviioURL){
-    console.log('index.js - copyToClipboard - Received URL', serviioURL)
+    //console.log('index.js - copyToClipboard - Received URL', serviioURL)
     clipboard.set(serviioURL)
     });
 

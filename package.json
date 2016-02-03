@@ -1,8 +1,10 @@
 {
-  "title": "Firefox Serviio",
-  "name": "ffserviio",
+  "title": "Serviio FoxyTube",
+  "name": "serviio-foxytube",
+  "icon" : "resource://serviio-foxytube/data/icon-serviio.png",
   "version": "0.0.1",
-  "description": "A basic add-on",
+  "description": "Serviio FoxyTube provides an easy way to obtain valid Youtube URL's for Serviio DLNA. It uses the latest Youtube v3 API.\nYou will be able to copy the URL from the clipboard by clicking the Serviio button, and after adding the URL into Serviio.\nThe Serviio button is visible on:\n1) Videos tab of a channel\n2) Playlist page.\nTrust me, you'll love it",
+  "homepage" : "https://github.com/sorinello/serviio-firefox",
   "main": "index.js",
   "author": "Sorin Burjan",
   "engines": {
@@ -10,6 +12,6 @@
   },
   "license": "LGPLv3",
   "keywords": [
-    "jetpack"
+    "jetpack", "serviio", "youtube", "dlna"
   ]
 }

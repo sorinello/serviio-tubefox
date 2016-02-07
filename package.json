@@ -13,5 +13,21 @@
   "license": "LGPLv3",
   "keywords": [
     "jetpack", "serviio", "youtube", "dlna"
-  ]
+  ],
+  "preferences": [{
+    "name": "useREST",
+    "title": "Integrate with Serviio DLNA",
+    "description": "Enable REST system. If this is checked, then clicking the Serviio button will automatically add the resouse to your Serviio DLNA",
+    "type": "bool",
+    "value": true
+    },
+    {
+    "name": "serviioURL",
+    "title": "Serviio URL",
+    "description": "URL to the Serviio DLNA Server. It must include the port number",
+    "type": "string",
+    "value": "http://homeworld:23423/"
+    }]
 }
+
+

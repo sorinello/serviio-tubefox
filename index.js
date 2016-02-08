@@ -3,6 +3,7 @@ var data = require('sdk/self').data
 var clipboard = require('sdk/clipboard')
 var pageMod = require("sdk/page-mod")
 var Request = require("sdk/request").Request;
+var XMLHttpRequest = require("sdk/net/xhr").XMLHttpRequest;
 var preferences = require('sdk/simple-prefs').prefs;
 
 
@@ -14,128 +15,116 @@ pageMod.PageMod({
   ],
   contentScriptWhen: 'end',
   onAttach: function(worker) {
-    worker.port.emit('init')
-    worker.port.on('copyToClipboard', function(serviioObject) {
+      worker.port.emit('init')
+      worker.port.on('copyToClipboard', function(serviioObject) {
 
-      // console.log(preferences['useREST'])
-      // console.log(preferences['serviioURL'])
+        var serviioRESTURL = preferences['serviioURL'].replace(/\/$/, '')
+        console.log(serviioRESTURL)
 
-      var serviioRESTURL = preferences['serviioURL'].replace(/\/$/, '')
-      console.log(serviioRESTURL)
-      var resolveMessages = []
+        isServiioRunning().then(isYoutubePluginPresent)
+          .then(addYoutubeSource)
+          .then(successUI)
+          .catch(function(error) {
+            //console.log(error.fileName + ':' + error.lineNumber + ':' + error)
+            errorUI()
+          })
 
-      function isServiioRunning() {
-        return new Promise(
-          function(resolve, reject) {
-            var serviioStatus = Request({
-              url: serviioRESTURL + '/rest/service-status',
-              contentType: 'application/json',
-              headers: {
-                accept: 'application/json'
-              },
-              onComplete: function(response) {
-                if (response.status === 200 && response.json.serviceStarted) {
+        // Wrap XHR object inside a Promise. Using XHR because Request SDK does not support timeout, and default timeout is too high for the user to wait
+        function isServiioRunning() {
+          return new Promise(
+            function(resolve, reject) {
+              var xhr = new XMLHttpRequest();
+              xhr.open("GET", serviioRESTURL + '/rest/service-status');
+              xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
+              xhr.timeout = 2000; // Set timeout to 2 seconds (2000 milliseconds)
+              xhr.onload = function() {
+                if (xhr.readyState == 4) {
                   console.log('[isServiioRunning] - Promise fulfilled. Async code terminated')
-                  resolveMessages.push({
-                    'isServiioRunning': 'true'
-                  })
                   resolve({
                     'isServiioRunning': 'true'
                   })
-                } else {
-                  console.log('[isServiioRunning] - Promise rejected. Async code terminated')
-                  reject({
-                    'isServiioRunning': 'false'
-                  })
                 }
               }
-            }).get()
-          })
-      }
-
-      function isYoutubePluginPresent() {
-        return new Promise(
-          function(resolve, reject) {
-            var serviioStatus = Request({
-              url: serviioRESTURL + '/rest/plugins',
-              contentType: 'application/json',
-              headers: {
-                accept: 'application/json'
-              },
-              onComplete: function(response) {
-                if (response.json.plugins.length) {
-                  response.json.plugins.map(function(plugin) {
-                    if (plugin.name === 'YouTube') {
-                      console.log('[isYoutubePluginPresent] - Promise fulfilled. Async code terminated')
-                      resolveMessages.push({
-                        'isYoutubePluginPresent': 'true'
-                      })
-                      resolve({
-                        'isYoutubePluginPresent': 'true'
-                      });
-                    } else {
-                      console.log('[isYoutubePluginPresent] - Promise rejected. Async code terminated')
-                      reject({
-                        'isYoutubePluginPresent': 'false'
-                      })
-                    }
-                  })
-                } else {
-                  console.log('[isYoutubePluginPresent] - Promise rejected. Async code terminated')
-                  reject({
-                    'isYoutubePluginPresent': 'false'
-                  })
-                }
+              xhr.ontimeout = function() {
+                console.log('[isServiioRunning] - Promise rejected. Async code terminated. Please check if your Serviio server is started or that the add-on Serviio URL is properly set.')
+                reject({
+                  'isServiioRunning': 'false'
+                })
               }
-            }).get()
-          })
-      }
-
-      function addYoutubeSource() {
-        return new Promise(
-          function(resolve, reject) {
-            var serviioStatus = Request({
-              url: serviioRESTURL + '/rest/import-export/online',
-              contentType: 'application/xml',
-              headers: {
-                accept: "application/xml"
-              },
-              content: prepareRequestBody(),
-              onComplete: function(response) {
-                if (response.status === 204) {
-                  console.log('[addYoutubeSource] - Promise fulfilled. Async code terminated')
-                  resolveMessages.push({
-                    'addYoutubeSource': 'true'
-                  })
-                  resolve({
-                    'addYoutubeSource': 'true'
-                  });
-                } else {
-                  console.log('[addYoutubeSource] - Promise rejected. Async code terminated')
-                  reject({
-                    'addYoutubeSource': 'false'
-                  })
-                }
-              }
-            }).put()
-          })
-      }
-
-      function prepareRequestBody() {
-        var serviioURL = serviioObject.serviioURL
-        var channelName = serviioObject.channelName
-        var playlistName = serviioObject.playlistName
-        var mediaSourceName
-        if (playlistName) {
-          mediaSourceName = channelName + ' - ' + playlistName
-        } else {
-          mediaSourceName = channelName
+              xhr.send();
+            })
         }
 
-        return `<onlineRepositoriesBackup>
+        function isYoutubePluginPresent() {
+          return new Promise(
+            function(resolve, reject) {
+              var serviioStatus = Request({
+                url: serviioRESTURL + '/rest/plugins',
+                contentType: 'application/json',
+                headers: {
+                  accept: 'application/json'
+                },
+                onComplete: function(response) {
+                  if (response.json.plugins.length) {
+                    response.json.plugins.map(function(plugin) {
+                      if (plugin.name === 'YouTube') {
+                        console.log('[isYoutubePluginPresent] - Promise fulfilled. Async code terminated')
+                        resolve({
+                          'isYoutubePluginPresent': 'true'
+                        });
+                      } else {
+                        console.log('[isYoutubePluginPresent] - Promise rejected. Async code terminated. Youtube plugin was not found. Please install Youtube plugin before')
+                        reject({
+                          'isYoutubePluginPresent': 'false'
+                        })
+                      }
+                    })
+                  } else {
+                    console.log('[isYoutubePluginPresent] - Promise rejected. Async code terminated')
+                    reject({
+                      'isYoutubePluginPresent': 'false'
+                    })
+                  }
+                }
+              }).get()
+            })
+        }
+
+        function addYoutubeSource() {
+          return new Promise(
+            function(resolve, reject) {
+              var serviioStatus = Request({
+                url: serviioRESTURL + '/rest/import-export/online',
+                contentType: 'application/xml',
+                headers: {
+                  accept: "application/xml"
+                },
+                content: prepareRequestBody(),
+                onComplete: function(response) {
+                  if (response.status === 204) {
+                    console.log('[addYoutubeSource] - Promise fulfilled. Async code terminated')
+                    resolve({
+                      'addYoutubeSource': 'true'
+                    });
+                  } else {
+                    console.log('[addYoutubeSource] - Promise rejected. Async code terminated. Serviio DLNA did not accept the URL. This should not happen. Response status: ' + response.status)
+                    reject({
+                      'addYoutubeSource': 'false'
+                    })
+                  }
+                }
+              }).put()
+            })
+        }
+
+        function prepareRequestBody() {
+
+          var mediaSourceName = (serviioObject.playlistName.length > 0) ? mediaSourceName = serviioObject.channelName + ' - ' + serviioObject.playlistName : mediaSourceName = serviioObject.channelName
+
+          return `<onlineRepositoriesBackup>
             <items>
               <backupItem enabled="true">
-                <serviioLink>serviio:\/\/video:web?url=${serviioURL}&amp;name=${mediaSourceName}</serviioLink>
+                <serviioLink>serviio:\/\/video:web?url=${serviioObject.serviioURL}&amp;name=${mediaSourceName}</serviioLink>
                   <accessGroupIds>
                     <id>1</id>
                   </accessGroupIds>
@@ -143,21 +132,17 @@ pageMod.PageMod({
             </items>
           </onlineRepositoriesBackup>`
 
-      }
+        }
 
-      function informUI() {
-        console.log('resolveMessages', resolveMessages)
-        worker.port.emit('success')
-      }
+        function successUI() {
+          worker.port.emit('success')
+        }
 
-      isServiioRunning().then(isYoutubePluginPresent)
-        .then(addYoutubeSource)
-        .then(informUI)
-        .catch(function(err) {
-          console.log(err.fileName + ":" + err.lineNumber + ":" + err)
-        })
-    }); // end port.on
-  } // end onAttach
+        function errorUI() {
+          worker.port.emit('error')
+        }
+      }); // end port.on
+    } // end onAttach
 }); //end PageMod
 
 tabs.open('https://www.youtube.com/user/catmusicoffice/videos')

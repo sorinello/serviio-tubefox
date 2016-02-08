@@ -13,7 +13,7 @@ self.port.on('init', function() {
 	// pass in the mutationNode node, as well as the observer options
 	observer.observe(document.querySelector('#content'), config)
 	console.log('Running the landing process', document.location.href)
-		// call this because refreshing OR landing directly on a Youtube page, the mutation will not trigger in time
+	// call this because refreshing OR landing directly on a Youtube page, the mutation will not trigger in time
 	processPage()
 
 	function processPage() {
@@ -54,9 +54,6 @@ self.port.on('init', function() {
 		})
 
 		serviioButton.click(function() {
-			// console.log('content-script.js - copyToClipboard - Sending URL', serviioURL)
-			// console.log('Channel Title', $('.branded-page-header-title-link').text().trim())
-			// console.log('PlayList Name', $('.pl-header-title').text().trim())
 			var serviioObject = {
 				"serviioURL"  : serviioURL,
 				"channelName" : $('.branded-page-header-title-link').text().trim(),
@@ -88,17 +85,22 @@ self.port.on('init', function() {
 })
 
 self.port.on('success', function() {
-	console.log('Success')
 	$('.serviioButton').css({
 		'background-image': 'url(resource://serviio-foxytube/data/success.png)',
 		'background-size' : '26px'
 	})
-
-	// window.setTimeout(function(){
-	// $('.serviioButton').css({
-	// 	'background-image': 'url(resource://serviio-foxytube/data/icon-serviio.png)',
-	// 	'background-size': '26px'
-	// })
-	// }, 5000)
-
 })
+
+self.port.on('error', function() {
+	$('.serviioButton').css({
+		'background-image' : 'url(resource://serviio-foxytube/data/error.png)'
+	})
+
+	window.setTimeout(function(){
+	$('.serviioButton').css({
+		'background-image': 'url(resource://serviio-foxytube/data/icon-serviio.png)',
+		'background-size': '26px'
+	})
+	}, 1000)
+})
+

@@ -1,6 +1,11 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. 
+ * Copyright (c) 2016 Sorin Burjan
+ */
+
 var tabs = require("sdk/tabs")
 var data = require('sdk/self').data
-var clipboard = require('sdk/clipboard')
 var pageMod = require("sdk/page-mod")
 var Request = require("sdk/request").Request;
 var XMLHttpRequest = require("sdk/net/xhr").XMLHttpRequest;
@@ -24,8 +29,8 @@ pageMod.PageMod({
         isServiioRunning().then(isYoutubePluginPresent)
           .then(addYoutubeSource)
           .then(successUI)
-          .catch(function(error) {
-            //console.log(error.fileName + ':' + error.lineNumber + ':' + error)
+          .catch(function(reject) {
+            console.log('ERROR', reject)
             errorUI()
           })
 
@@ -107,7 +112,7 @@ pageMod.PageMod({
                       'addYoutubeSource': 'true'
                     });
                   } else {
-                    console.log('[addYoutubeSource] - Promise rejected. Async code terminated. Serviio DLNA did not accept the URL. This should not happen. Response status: ' + response.status)
+                    console.log('[addYoutubeSource] - Promise rejected. Async code terminated. Serviio DLNA did not accept the feed. This should not happen. Response status: ' + response.status)
                     reject({
                       'addYoutubeSource': 'false'
                     })
@@ -146,6 +151,6 @@ pageMod.PageMod({
 }); //end PageMod
 
 tabs.open('https://www.youtube.com/user/catmusicoffice/videos')
-  // tabs.open('https://www.youtube.com/playlist?list=PLCzQ2UHQfewRpVrmLIEy_Dh98sEU2x0o6')
-  // tabs.open('https://www.youtube.com/user/erlazantivirus/videos')
-  // tabs.open('https://www.youtube.com/channel/UCEY2CNlzLkUedfuPAiPpEKg/videos')
+tabs.open('https://www.youtube.com/playlist?list=PLCzQ2UHQfewRpVrmLIEy_Dh98sEU2x0o6')
+tabs.open('https://www.youtube.com/user/erlazantivirus/videos')
+tabs.open('https://www.youtube.com/channel/UCEY2CNlzLkUedfuPAiPpEKg/videos')

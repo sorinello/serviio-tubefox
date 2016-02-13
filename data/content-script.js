@@ -1,37 +1,41 @@
-const VIDEOS_USERNAME_BASE_URL   = 'https://www.googleapis.com/youtube/v3/channels?forUsername='
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. 
+ * Copyright (c) 2016 Sorin Burjan
+ */
+
+const VIDEOS_USERNAME_BASE_URL = 'https://www.googleapis.com/youtube/v3/channels?forUsername='
 const VIDEOS_CHANNEL_ID_BASE_URL = 'https://www.googleapis.com/youtube/v3/channels?id='
-const PLAYLIST_BASE_URL          = 'https://www.googleapis.com/youtube/v3/playlistItems?playlistId='
+const PLAYLIST_BASE_URL = 'https://www.googleapis.com/youtube/v3/playlistItems?playlistId='
 
 self.port.on('init', function() {
 	var observer = new MutationObserver(processPage);
 	// configuration of the observer:
 	var config = {
-		attributes   : true,
-		childList    : true,
+		attributes: true,
+		childList: true,
 		characterData: true
 	};
 	// pass in the mutationNode node, as well as the observer options
 	observer.observe(document.querySelector('#content'), config)
 	console.log('Running the landing process', document.location.href)
+
 	// call this because refreshing OR landing directly on a Youtube page, the mutation will not trigger in time
-	processPage()
-
-	function processPage() {
-		currentLocation = document.location.href;
-		if (!serviioButtonExists() && currentLocation.includes('/user/') && currentLocation.includes('/videos')) {
-			var serviioURL = VIDEOS_USERNAME_BASE_URL + getChannelIdentifier()
-			createServiioVideosButton(serviioURL).prependTo('.branded-page-v2-subnav-container')
-		}
-		if (!serviioButtonExists() && currentLocation.includes('/channel/') && currentLocation.includes('/videos')) {
-			var serviioURL = VIDEOS_CHANNEL_ID_BASE_URL + getChannelIdentifier()
-			createServiioVideosButton(serviioURL).prependTo('.branded-page-v2-subnav-container')
-		}
-
-		if (!serviioButtonExists() && currentLocation.includes('/playlist?list=')) {
-			var serviioURL = PLAYLIST_BASE_URL + getPlaylistId()
-			createServiioButton(serviioURL).appendTo('.playlist-actions')
-		}
+	currentLocation = document.location.href;
+	if (!serviioButtonExists() && currentLocation.includes('/user/') && currentLocation.includes('/videos')) {
+		var serviioURL = VIDEOS_USERNAME_BASE_URL + getChannelIdentifier()
+		createServiioVideosButton(serviioURL).prependTo('.branded-page-v2-subnav-container')
 	}
+	if (!serviioButtonExists() && currentLocation.includes('/channel/') && currentLocation.includes('/videos')) {
+		var serviioURL = VIDEOS_CHANNEL_ID_BASE_URL + getChannelIdentifier()
+		createServiioVideosButton(serviioURL).prependTo('.branded-page-v2-subnav-container')
+	}
+
+	if (!serviioButtonExists() && currentLocation.includes('/playlist?list=')) {
+		var serviioURL = PLAYLIST_BASE_URL + getPlaylistId()
+		createServiioButton(serviioURL).appendTo('.playlist-actions')
+	}
+
 
 	function serviioButtonExists() {
 		if ($('.serviioButton').length) {
@@ -43,20 +47,20 @@ self.port.on('init', function() {
 
 	function createServiioButton(serviioURL) {
 		var serviioButton = $('<button/>', {
-			'type'  : 'button',
-			'class' : 'serviioButton yt-uix-button yt-uix-button-default',
-			'name'  : 'Serviio Button',
+			'type': 'button',
+			'class': 'serviioButton yt-uix-button yt-uix-button-default',
+			'name': 'Serviio Button',
 		}).css({
 			'background-image': 'url(resource://serviio-foxytube/data/icon-serviio.png)',
-			'background-size' : '26px',
-			'width'           : '28px',
-			'height'          : '28px',
+			'background-size': '26px',
+			'width': '28px',
+			'height': '28px',
 		})
 
 		serviioButton.click(function() {
 			var serviioObject = {
-				"serviioURL"  : serviioURL,
-				"channelName" : $('.branded-page-header-title-link').text().trim(),
+				"serviioURL": serviioURL,
+				"channelName": $('.branded-page-header-title-link').text().trim(),
 				"playlistName": $('.pl-header-title').text().trim()
 			}
 			self.port.emit('copyToClipboard', serviioObject)
@@ -67,7 +71,7 @@ self.port.on('init', function() {
 	function createServiioVideosButton(serviioURL) {
 		var serviioVideosButton = createServiioButton(serviioURL)
 		serviioVideosButton.css({
-			'float'      : 'right',
+			'float': 'right',
 			'margin-left': '5px'
 		})
 		return serviioVideosButton
@@ -87,20 +91,19 @@ self.port.on('init', function() {
 self.port.on('success', function() {
 	$('.serviioButton').css({
 		'background-image': 'url(resource://serviio-foxytube/data/success.png)',
-		'background-size' : '26px'
+		'background-size': '26px'
 	})
 })
 
 self.port.on('error', function() {
 	$('.serviioButton').css({
-		'background-image' : 'url(resource://serviio-foxytube/data/error.png)'
+		'background-image': 'url(resource://serviio-foxytube/data/error.png)'
 	})
 
-	window.setTimeout(function(){
-	$('.serviioButton').css({
-		'background-image': 'url(resource://serviio-foxytube/data/icon-serviio.png)',
-		'background-size': '26px'
-	})
+	window.setTimeout(function() {
+		$('.serviioButton').css({
+			'background-image': 'url(resource://serviio-foxytube/data/icon-serviio.png)',
+			'background-size': '26px'
+		})
 	}, 1000)
 })
-

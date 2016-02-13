@@ -53,7 +53,7 @@ self.port.on('init', function() {
 			'class': 'serviioButton yt-uix-button yt-uix-button-default',
 			'name': 'Serviio Button',
 		}).css({
-			'background-image': 'url(resource://serviio-foxytube/data/icon-serviio.png)',
+			'background-image': 'url(resource://serviio-foxytube/data/img/icon-serviio.png)',
 			'background-size': '26px',
 			'width': '28px',
 			'height': '28px',
@@ -92,19 +92,19 @@ self.port.on('init', function() {
 
 self.port.on('success', function() {
 	$('.serviioButton').css({
-		'background-image': 'url(resource://serviio-foxytube/data/success.png)',
+		'background-image': 'url(resource://serviio-foxytube/data/img/success.png)',
 		'background-size': '26px'
 	})
 })
 
 self.port.on('error', function() {
 	$('.serviioButton').css({
-		'background-image': 'url(resource://serviio-foxytube/data/error.png)'
+		'background-image': 'url(resource://serviio-foxytube/data/img/error.png)'
 	})
 
 	window.setTimeout(function() {
 		$('.serviioButton').css({
-			'background-image': 'url(resource://serviio-foxytube/data/icon-serviio.png)',
+			'background-image': 'url(resource://serviio-foxytube/data/img/icon-serviio.png)',
 			'background-size': '26px'
 		})
 	}, 1000)

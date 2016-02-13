@@ -19,23 +19,25 @@ self.port.on('init', function() {
 	// pass in the mutationNode node, as well as the observer options
 	observer.observe(document.querySelector('#content'), config)
 	console.log('Running the landing process', document.location.href)
+		// call this because refreshing OR landing directly on a Youtube page, the mutation will not trigger in time
+	processPage()
 
-	// call this because refreshing OR landing directly on a Youtube page, the mutation will not trigger in time
-	currentLocation = document.location.href;
-	if (!serviioButtonExists() && currentLocation.includes('/user/') && currentLocation.includes('/videos')) {
-		var serviioURL = VIDEOS_USERNAME_BASE_URL + getChannelIdentifier()
-		createServiioVideosButton(serviioURL).prependTo('.branded-page-v2-subnav-container')
-	}
-	if (!serviioButtonExists() && currentLocation.includes('/channel/') && currentLocation.includes('/videos')) {
-		var serviioURL = VIDEOS_CHANNEL_ID_BASE_URL + getChannelIdentifier()
-		createServiioVideosButton(serviioURL).prependTo('.branded-page-v2-subnav-container')
-	}
+	function processPage() {
+		currentLocation = document.location.href;
+		if (!serviioButtonExists() && currentLocation.includes('/user/') && currentLocation.includes('/videos')) {
+			var serviioURL = VIDEOS_USERNAME_BASE_URL + getChannelIdentifier()
+			createServiioVideosButton(serviioURL).prependTo('.branded-page-v2-subnav-container')
+		}
+		if (!serviioButtonExists() && currentLocation.includes('/channel/') && currentLocation.includes('/videos')) {
+			var serviioURL = VIDEOS_CHANNEL_ID_BASE_URL + getChannelIdentifier()
+			createServiioVideosButton(serviioURL).prependTo('.branded-page-v2-subnav-container')
+		}
 
-	if (!serviioButtonExists() && currentLocation.includes('/playlist?list=')) {
-		var serviioURL = PLAYLIST_BASE_URL + getPlaylistId()
-		createServiioButton(serviioURL).appendTo('.playlist-actions')
+		if (!serviioButtonExists() && currentLocation.includes('/playlist?list=')) {
+			var serviioURL = PLAYLIST_BASE_URL + getPlaylistId()
+			createServiioButton(serviioURL).appendTo('.playlist-actions')
+		}
 	}
-
 
 	function serviioButtonExists() {
 		if ($('.serviioButton').length) {

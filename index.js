@@ -1,60 +1,82 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. 
+ *
  * Copyright (c) 2016 Sorin Burjan
  */
 
-var tabs = require("sdk/tabs")
+var tabs = require('sdk/tabs')
 var data = require('sdk/self').data
-var pageMod = require("sdk/page-mod")
-var Request = require("sdk/request").Request;
-var XMLHttpRequest = require("sdk/net/xhr").XMLHttpRequest;
+var pageMod = require('sdk/page-mod')
+var Request = require('sdk/request').Request;
+var XMLHttpRequest = require('sdk/net/xhr').XMLHttpRequest;
 var preferences = require('sdk/simple-prefs').prefs;
 
 
 pageMod.PageMod({
-  include: "*.youtube.com",
+  include: '*.youtube.com',
   contentScriptFile: [
     data.url('jquery-2.2.0.min.js'),
-    data.url('content-script.js')
+    data.url('content-script.js'),
+    data.url('jquery-ui.min.js')
+  ],
+  contentStyleFile: [
+    data.url('jquery-ui.min.css')
   ],
   contentScriptWhen: 'end',
   onAttach: function(worker) {
       worker.port.emit('init')
-      worker.port.on('copyToClipboard', function(serviioObject) {
+      worker.port.on('sendToServiio', function(feedData) {
 
-        var serviioRESTURL = preferences['serviioURL'].replace(/\/$/, '')
-        console.log(serviioRESTURL)
+        var serviioBaseURL = preferences['serviioBaseURL']
+
+        if (!isServiioBaseURLValid()) {
+          console.log('serviioBaseURL not valid')
+          errorUI('Error: Invalid Serviio URL')
+          return
+        }
 
         isServiioRunning().then(isYoutubePluginPresent)
           .then(addYoutubeSource)
           .then(successUI)
           .catch(function(reject) {
             console.log('ERROR', reject)
-            errorUI()
+            errorUI(reject)
           })
+
+        function isServiioBaseURLValid() {
+          serviioBaseURL = serviioBaseURL.trim().replace(/\/$/, '')
+          if (serviioBaseURL.length === 0) {
+            console.log('serviioBaseURL preference is empty, defaulting to http://localhost:23423')
+            serviioBaseURL = 'http://localhost:23423'
+            return true
+          } else {
+            return serviioBaseURL.toLowerCase().includes('http://')
+          }
+        }
 
         // Wrap XHR object inside a Promise. Using XHR because Request SDK does not support timeout, and default timeout is too high for the user to wait
         function isServiioRunning() {
           return new Promise(
             function(resolve, reject) {
               var xhr = new XMLHttpRequest();
-              xhr.open("GET", serviioRESTURL + '/rest/service-status');
-              xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
+              var restURL = serviioBaseURL + '/rest/service-status'
+              xhr.open('GET', restURL);
+              xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
               xhr.timeout = 2000; // Set timeout to 2 seconds (2000 milliseconds)
               xhr.onload = function() {
-                if (xhr.readyState == 4) {
+                if (xhr.readyState === 4 && xhr.status === 200) {
                   console.log('[isServiioRunning] - Promise fulfilled. Async code terminated')
-                  resolve({
-                    'isServiioRunning': 'true'
-                  })
+                  resolve()
                 }
+              }
+              xhr.onerror = function() {
+                console.log('[isServiioRunning] - Promise rejected. Async code terminated. Please check if your Serviio server is started or that the add-on Serviio URL is properly set.')
+                reject('Error: Serviio is not running or the URL was incorrect')
               }
               xhr.ontimeout = function() {
                 console.log('[isServiioRunning] - Promise rejected. Async code terminated. Please check if your Serviio server is started or that the add-on Serviio URL is properly set.')
-                reject({
-                  'isServiioRunning': 'false'
-                })
+                reject('Error: Serviio is not running or the URL was incorrect')
               }
               xhr.send();
             })
@@ -63,8 +85,9 @@ pageMod.PageMod({
         function isYoutubePluginPresent() {
           return new Promise(
             function(resolve, reject) {
+              var restURL = serviioBaseURL + '/rest/plugins'
               var serviioStatus = Request({
-                url: serviioRESTURL + '/rest/plugins',
+                url: restURL,
                 contentType: 'application/json',
                 headers: {
                   accept: 'application/json'
@@ -74,21 +97,15 @@ pageMod.PageMod({
                     response.json.plugins.map(function(plugin) {
                       if (plugin.name === 'YouTube') {
                         console.log('[isYoutubePluginPresent] - Promise fulfilled. Async code terminated')
-                        resolve({
-                          'isYoutubePluginPresent': 'true'
-                        });
+                        resolve()
                       } else {
                         console.log('[isYoutubePluginPresent] - Promise rejected. Async code terminated. Youtube plugin was not found. Please install Youtube plugin before')
-                        reject({
-                          'isYoutubePluginPresent': 'false'
-                        })
+                        reject('Error: Youtube plugin was not found')
                       }
                     })
                   } else {
                     console.log('[isYoutubePluginPresent] - Promise rejected. Async code terminated')
-                    reject({
-                      'isYoutubePluginPresent': 'false'
-                    })
+                    reject('Error: Youtube plugin was not found')
                   }
                 }
               }).get()
@@ -98,24 +115,21 @@ pageMod.PageMod({
         function addYoutubeSource() {
           return new Promise(
             function(resolve, reject) {
+              var restURL = serviioBaseURL + '/rest/import-export/online'
               var serviioStatus = Request({
-                url: serviioRESTURL + '/rest/import-export/online',
+                url: restURL,
                 contentType: 'application/xml',
                 headers: {
-                  accept: "application/xml"
+                  accept: 'application/xml'
                 },
                 content: prepareRequestBody(),
                 onComplete: function(response) {
                   if (response.status === 204) {
                     console.log('[addYoutubeSource] - Promise fulfilled. Async code terminated')
-                    resolve({
-                      'addYoutubeSource': 'true'
-                    });
+                    resolve()
                   } else {
                     console.log('[addYoutubeSource] - Promise rejected. Async code terminated. Serviio DLNA did not accept the feed. This should not happen. Response status: ' + response.status)
-                    reject({
-                      'addYoutubeSource': 'false'
-                    })
+                    reject('Error: Serviio DLNA did not accept the feed. This should not happen. Validation error, status code: ' + response.status)
                   }
                 }
               }).put()
@@ -124,12 +138,12 @@ pageMod.PageMod({
 
         function prepareRequestBody() {
 
-          var mediaSourceName = (serviioObject.playlistName.length > 0) ? mediaSourceName = serviioObject.channelName + ' - ' + serviioObject.playlistName : mediaSourceName = serviioObject.channelName
+          var mediaSourceName = (feedData.playlistName.length > 0) ? mediaSourceName = feedData.channelName + ' - ' + feedData.playlistName : mediaSourceName = feedData.channelName
 
           return `<onlineRepositoriesBackup>
             <items>
               <backupItem enabled="true">
-                <serviioLink>serviio:\/\/video:web?url=${serviioObject.serviioURL}&amp;name=${mediaSourceName}</serviioLink>
+                <serviioLink>serviio:\/\/video:web?url=${feedData.serviioURL}&amp;name=${mediaSourceName}</serviioLink>
                   <accessGroupIds>
                     <id>1</id>
                   </accessGroupIds>
@@ -143,14 +157,14 @@ pageMod.PageMod({
           worker.port.emit('success')
         }
 
-        function errorUI() {
-          worker.port.emit('error')
+        function errorUI(reject) {
+          worker.port.emit('error', reject)
         }
       }); // end port.on
     } // end onAttach
 }); //end PageMod
 
 tabs.open('https://www.youtube.com/user/catmusicoffice/videos')
-tabs.open('https://www.youtube.com/playlist?list=PLCzQ2UHQfewRpVrmLIEy_Dh98sEU2x0o6')
-tabs.open('https://www.youtube.com/user/erlazantivirus/videos')
-tabs.open('https://www.youtube.com/channel/UCEY2CNlzLkUedfuPAiPpEKg/videos')
+  // tabs.open('https://www.youtube.com/playlist?list=PLCzQ2UHQfewRpVrmLIEy_Dh98sEU2x0o6')
+  // tabs.open('https://www.youtube.com/user/erlazantivirus/videos')
+  // tabs.open('https://www.youtube.com/channel/UCEY2CNlzLkUedfuPAiPpEKg/videos')

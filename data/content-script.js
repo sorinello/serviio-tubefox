@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. 
+ *
  * Copyright (c) 2016 Sorin Burjan
  */
 
@@ -19,39 +20,36 @@ self.port.on('init', function() {
 	// pass in the mutationNode node, as well as the observer options
 	observer.observe(document.querySelector('#content'), config)
 	console.log('Running the landing process', document.location.href)
-		// call this because refreshing OR landing directly on a Youtube page, the mutation will not trigger in time
+
+	// call this because refreshing OR landing directly on a Youtube page, the mutation will not trigger in time
 	processPage()
 
 	function processPage() {
 		currentLocation = document.location.href;
 		if (!serviioButtonExists() && currentLocation.includes('/user/') && currentLocation.includes('/videos')) {
-			var serviioURL = VIDEOS_USERNAME_BASE_URL + getChannelIdentifier()
-			createServiioVideosButton(serviioURL).prependTo('.branded-page-v2-subnav-container')
+			var feedURL = VIDEOS_USERNAME_BASE_URL + getChannelIdentifier()
+			createServiioVideosButton(feedURL).prependTo('.branded-page-v2-subnav-container')
 		}
 		if (!serviioButtonExists() && currentLocation.includes('/channel/') && currentLocation.includes('/videos')) {
-			var serviioURL = VIDEOS_CHANNEL_ID_BASE_URL + getChannelIdentifier()
-			createServiioVideosButton(serviioURL).prependTo('.branded-page-v2-subnav-container')
+			var feedURL = VIDEOS_CHANNEL_ID_BASE_URL + getChannelIdentifier()
+			createServiioVideosButton(feedURL).prependTo('.branded-page-v2-subnav-container')
 		}
 
 		if (!serviioButtonExists() && currentLocation.includes('/playlist?list=')) {
-			var serviioURL = PLAYLIST_BASE_URL + getPlaylistId()
-			createServiioButton(serviioURL).appendTo('.playlist-actions')
+			var feedURL = PLAYLIST_BASE_URL + getPlaylistId()
+			createServiioButton(feedURL).appendTo('.playlist-actions')
 		}
 	}
 
 	function serviioButtonExists() {
-		if ($('.serviioButton').length) {
-			return true
-		} else {
-			return false
-		}
+		return ($('.serviioButton').length) ? true : false
 	}
 
-	function createServiioButton(serviioURL) {
+	function createServiioButton(feedURL) {
 		var serviioButton = $('<button/>', {
 			'type': 'button',
 			'class': 'serviioButton yt-uix-button yt-uix-button-default',
-			'name': 'Serviio Button',
+			'title': 'Send to Serviio'
 		}).css({
 			'background-image': 'url(resource://serviio-foxytube/data/img/icon-serviio.png)',
 			'background-size': '26px',
@@ -60,18 +58,19 @@ self.port.on('init', function() {
 		})
 
 		serviioButton.click(function() {
-			var serviioObject = {
-				"serviioURL": serviioURL,
-				"channelName": $('.branded-page-header-title-link').text().trim(),
-				"playlistName": $('.pl-header-title').text().trim()
+			var feedData = {
+				feedURL: feedURL,
+				channelName: $('.branded-page-header-title-link').text().trim(),
+				playlistName: $('.pl-header-title').text().trim()
 			}
-			self.port.emit('copyToClipboard', serviioObject)
+			self.port.emit('sendToServiio', feedData)
 		})
+		serviioButton.tooltip()
 		return serviioButton
 	}
 
-	function createServiioVideosButton(serviioURL) {
-		var serviioVideosButton = createServiioButton(serviioURL)
+	function createServiioVideosButton(feedURL) {
+		var serviioVideosButton = createServiioButton(feedURL)
 		serviioVideosButton.css({
 			'float': 'right',
 			'margin-left': '5px'
@@ -95,17 +94,24 @@ self.port.on('success', function() {
 		'background-image': 'url(resource://serviio-foxytube/data/img/success.png)',
 		'background-size': '26px'
 	})
+	$('.serviioButton').attr('title', 'Success!')
+	$('.serviioButton').tooltip()
 })
 
-self.port.on('error', function() {
+self.port.on('error', function(reject) {
 	$('.serviioButton').css({
 		'background-image': 'url(resource://serviio-foxytube/data/img/error.png)'
 	})
+	$('.serviioButton').attr('title', reject)
+	$('.serviioButton').tooltip()
 
+	// Restore de innitial button state after 5 seconds
 	window.setTimeout(function() {
 		$('.serviioButton').css({
 			'background-image': 'url(resource://serviio-foxytube/data/img/icon-serviio.png)',
 			'background-size': '26px'
 		})
-	}, 1000)
+		$('.serviioButton').attr('title', 'Send to Serviio')
+		$('.serviioButton').tooltip()
+	}, 5000)
 })

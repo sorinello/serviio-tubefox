@@ -139,11 +139,10 @@ pageMod.PageMod({
         function prepareRequestBody() {
 
           var mediaSourceName = (feedData.playlistName.length > 0) ? mediaSourceName = feedData.channelName + ' - ' + feedData.playlistName : mediaSourceName = feedData.channelName
-
           return `<onlineRepositoriesBackup>
             <items>
               <backupItem enabled="true">
-                <serviioLink>serviio:\/\/video:web?url=${feedData.serviioURL}&amp;name=${mediaSourceName}</serviioLink>
+                <serviioLink>serviio:\/\/video:web?url=${feedData.feedURL}&amp;name=${mediaSourceName}</serviioLink>
                   <accessGroupIds>
                     <id>1</id>
                   </accessGroupIds>

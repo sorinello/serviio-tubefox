@@ -49,9 +49,9 @@ self.port.on('init', function() {
     var serviioButton = $('<button/>', {
       'type': 'button',
       'class': 'serviioButton yt-uix-button yt-uix-button-default',
-      'title': 'Send to Serviio'
+      'title': 'Add to Serviio'
     }).css({
-      'background-image': 'url(resource://serviio-foxytube/data/img/icon-serviio.png)',
+      'background-image': 'url(resource://serviio-tubefox/data/img/icon-serviio.png)',
       'background-size': '26px',
       'width': '28px',
       'height': '28px',
@@ -63,7 +63,7 @@ self.port.on('init', function() {
         channelName: $('.branded-page-header-title-link').text().trim(),
         playlistName: $('.pl-header-title').text().trim()
       }
-      self.port.emit('sendToServiio', feedData)
+      self.port.emit('addToServiio', feedData)
     })
     serviioButton.tooltip()
     return serviioButton
@@ -91,7 +91,7 @@ self.port.on('init', function() {
 
 self.port.on('success', function() {
   $('.serviioButton').css({
-    'background-image': 'url(resource://serviio-foxytube/data/img/success.png)',
+    'background-image': 'url(resource://serviio-tubefox/data/img/success.png)',
     'background-size': '26px'
   })
   $('.serviioButton').attr('title', 'Success!')
@@ -100,7 +100,7 @@ self.port.on('success', function() {
 
 self.port.on('error', function(reject) {
   $('.serviioButton').css({
-    'background-image': 'url(resource://serviio-foxytube/data/img/error.png)'
+    'background-image': 'url(resource://serviio-tubefox/data/img/error.png)'
   })
   $('.serviioButton').attr('title', reject)
   $('.serviioButton').tooltip()
@@ -108,10 +108,10 @@ self.port.on('error', function(reject) {
   // Restore de innitial button state after 5 seconds
   window.setTimeout(function() {
     $('.serviioButton').css({
-      'background-image': 'url(resource://serviio-foxytube/data/img/icon-serviio.png)',
+      'background-image': 'url(resource://serviio-tubefox/data/img/icon-serviio.png)',
       'background-size': '26px'
     })
-    $('.serviioButton').attr('title', 'Send to Serviio')
+    $('.serviioButton').attr('title', 'Add to Serviio')
     $('.serviioButton').tooltip()
   }, 5000)
 })

@@ -1,24 +1,24 @@
 {
-  "title": "Serviio FoxyTube",
-  "name": "serviio-foxytube",
-  "icon": "resource://serviio-foxytube/data/icon-serviio.png",
+  "title": "Serviio TubeFox",
+  "name": "serviio-tubefox",
+  "icon": "resource://serviio-tubefox/data/icon-serviio.png",
   "version": "0.0.1",
   "description": "Serviio FoxyTube provides an easy way to obtain valid Youtube URL's for Serviio DLNA. It uses the latest Youtube v3 API.\nYou will be able to copy the URL from the clipboard by clicking the Serviio button, and after adding the URL into Serviio.\nThe Serviio button is visible on:\n1) Videos tab of a channel\n2) Playlist page.\nTrust me, you'll love it",
-  "homepage": "https://github.com/sorinello/serviio-firefox",
+  "homepage": "https://github.com/sorinello/serviio-tubefox",
   "main": "index.js",
   "author": "Sorin Burjan",
   "engines": {
     "firefox": ">=38.0a1"
   },
-  "license": "LGPLv3",
+  "license": "MPL-2.0",
   "keywords": [
-    "jetpack", "serviio", "youtube", "dlna"
+    "jetpack", "serviio", "youtube", "dlna", "plugin", "jquery"
   ],
   "preferences": [{
     "name": "serviioBaseURL",
     "title": "Serviio URL",
     "description": "URL to Serviio DLNA Server, must also include the port number. Make sure that port is open on the server machine.\nExample: http://localhost:23423\nExample: http://192.168.0.2:23423\nExample: http://mydomain.com:23423",
     "type": "string",
-    "value": "http://homeworld:23423/"
+    "value": "http://localhost:23423/"
   }]
 }

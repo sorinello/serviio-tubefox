@@ -26,7 +26,7 @@ pageMod.PageMod({
   contentScriptWhen: 'end',
   onAttach: function(worker) {
       worker.port.emit('init')
-      worker.port.on('sendToServiio', function(feedData) {
+      worker.port.on('addToServiio', function(feedData) {
 
         var serviioBaseURL = preferences['serviioBaseURL']
 
@@ -36,6 +36,7 @@ pageMod.PageMod({
           return
         }
 
+        // Flat chain and run the promises.
         isServiioRunning().then(isYoutubePluginPresent)
           .then(addYoutubeSource)
           .then(successUI)
@@ -55,7 +56,7 @@ pageMod.PageMod({
           }
         }
 
-        // Wrap XHR object inside a Promise. Using XHR because Request SDK does not support timeout, and default timeout is too high for the user to wait
+        // Wrap XHR object inside a Promise. Using XHR here, because Request SDK does not support timeout, and default timeout is too high for the user to wait
         function isServiioRunning() {
           return new Promise(
             function(resolve, reject) {
@@ -72,11 +73,11 @@ pageMod.PageMod({
               }
               xhr.onerror = function() {
                 console.log('[isServiioRunning] - Promise rejected. Async code terminated. Please check if your Serviio server is started or that the add-on Serviio URL is properly set.')
-                reject('Error: Serviio is not running or the URL was incorrect')
+                reject('Error: Serviio is not running or the URL is incorrect')
               }
               xhr.ontimeout = function() {
                 console.log('[isServiioRunning] - Promise rejected. Async code terminated. Please check if your Serviio server is started or that the add-on Serviio URL is properly set.')
-                reject('Error: Serviio is not running or the URL was incorrect')
+                reject('Error: Serviio is not running or the URL is incorrect')
               }
               xhr.send();
             })
@@ -99,13 +100,13 @@ pageMod.PageMod({
                         console.log('[isYoutubePluginPresent] - Promise fulfilled. Async code terminated')
                         resolve()
                       } else {
-                        console.log('[isYoutubePluginPresent] - Promise rejected. Async code terminated. Youtube plugin was not found. Please install Youtube plugin before')
-                        reject('Error: Youtube plugin was not found')
+                        console.log('[isYoutubePluginPresent] - Promise rejected. Async code terminated. Youtube plugin not found. Please install Youtube plugin before')
+                        reject('Error: Youtube plugin not found')
                       }
                     })
                   } else {
                     console.log('[isYoutubePluginPresent] - Promise rejected. Async code terminated')
-                    reject('Error: Youtube plugin was not found')
+                    reject('Error: Youtube plugin not found')
                   }
                 }
               }).get()
@@ -133,24 +134,24 @@ pageMod.PageMod({
                   }
                 }
               }).put()
+
+              function prepareRequestBody() {
+                var mediaSourceName = (feedData.playlistName.length > 0) ? mediaSourceName = feedData.channelName + ' - ' + feedData.playlistName : mediaSourceName = feedData.channelName
+                return `<onlineRepositoriesBackup>
+                          <items>
+                            <backupItem enabled="true">
+                              <serviioLink>serviio:\/\/video:web?url=${feedData.feedURL}&amp;name=${mediaSourceName}</serviioLink>
+                              <accessGroupIds>
+                                <id>1</id>
+                              </accessGroupIds>
+                            </backupItem>
+                          </items>
+                        </onlineRepositoriesBackup>`
+              }
             })
         }
 
-        function prepareRequestBody() {
 
-          var mediaSourceName = (feedData.playlistName.length > 0) ? mediaSourceName = feedData.channelName + ' - ' + feedData.playlistName : mediaSourceName = feedData.channelName
-          return `<onlineRepositoriesBackup>
-            <items>
-              <backupItem enabled="true">
-                <serviioLink>serviio:\/\/video:web?url=${feedData.feedURL}&amp;name=${mediaSourceName}</serviioLink>
-                  <accessGroupIds>
-                    <id>1</id>
-                  </accessGroupIds>
-              </backupItem>
-            </items>
-          </onlineRepositoriesBackup>`
-
-        }
 
         function successUI() {
           worker.port.emit('success')
@@ -162,8 +163,3 @@ pageMod.PageMod({
       }); // end port.on
     } // end onAttach
 }); //end PageMod
-
-tabs.open('https://www.youtube.com/user/catmusicoffice/videos')
-  // tabs.open('https://www.youtube.com/playlist?list=PLCzQ2UHQfewRpVrmLIEy_Dh98sEU2x0o6')
-  // tabs.open('https://www.youtube.com/user/erlazantivirus/videos')
-  // tabs.open('https://www.youtube.com/channel/UCEY2CNlzLkUedfuPAiPpEKg/videos')

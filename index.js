@@ -17,7 +17,7 @@ pageMod.PageMod({
   include: '*.youtube.com',
   contentScriptFile: [
     data.url('jquery-2.2.0.min.js'),
-    data.url('jquery-ui.min.js')
+    data.url('jquery-ui.min.js'),
     data.url('content-script.js')
   ],
   contentStyleFile: [

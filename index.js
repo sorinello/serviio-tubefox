@@ -95,15 +95,21 @@ pageMod.PageMod({
                 },
                 onComplete: function(response) {
                   if (response.json.plugins.length) {
+                    console.log('Response array: ', response.json.plugins)
+                    var pluginFound = false
                     response.json.plugins.map(function(plugin) {
                       if (plugin.name === 'YouTube') {
-                        console.log('[isYoutubePluginPresent] - Promise fulfilled. Async code terminated')
-                        resolve()
-                      } else {
-                        console.log('[isYoutubePluginPresent] - Promise rejected. Async code terminated. Youtube plugin not found. Please install Youtube plugin before')
-                        reject('Error: Youtube plugin not found')
+                        console.log('Youtube plugin found')
+                        pluginFound = true
                       }
                     })
+                    if (pluginFound) {
+                      console.log('[isYoutubePluginPresent] - Promise fulfilled. Async code terminated')
+                      resolve()
+                    } else {
+                      console.log('[isYoutubePluginPresent] - Promise rejected. Async code terminated. Youtube plugin not found. Please install Youtube plugin before')
+                      reject('Error: Youtube plugin not found')
+                    }
                   } else {
                     console.log('[isYoutubePluginPresent] - Promise rejected. Async code terminated')
                     reject('Error: Youtube plugin not found')
@@ -160,6 +166,6 @@ pageMod.PageMod({
         function errorUI(reject) {
           worker.port.emit('error', reject)
         }
-      }); // end port.on
-    } // end onAttach
+      }); //end port.on
+    } //end onAttach
 }); //end PageMod

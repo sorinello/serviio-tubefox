@@ -132,9 +132,11 @@ pageMod.PageMod({
                 content: prepareRequestBody(),
                 onComplete: function(response) {
                   if (response.status === 204) {
+                    console.log('[addYoutubeSource] - Request body', prepareRequestBody())
                     console.log('[addYoutubeSource] - Promise fulfilled. Async code terminated')
                     resolve()
                   } else {
+                    console.log('[addYoutubeSource] - Request body', prepareRequestBody())
                     console.log('[addYoutubeSource] - Promise rejected. Async code terminated. Serviio DLNA did not accept the feed. This should not happen. Response status: ' + response.status)
                     reject('Error: Serviio DLNA did not accept the feed. This should not happen. Validation error, status code: ' + response.status)
                   }
@@ -144,15 +146,15 @@ pageMod.PageMod({
               function prepareRequestBody() {
                 var mediaSourceName = (feedData.playlistName.length > 0) ? mediaSourceName = feedData.channelName + ' - ' + feedData.playlistName : mediaSourceName = feedData.channelName
                 return `<onlineRepositoriesBackup>
-                          <items>
-                            <backupItem enabled="true">
-                              <serviioLink>serviio:\/\/video:web?url=${feedData.feedURL}&amp;name=${mediaSourceName}</serviioLink>
-                              <accessGroupIds>
-                                <id>1</id>
-                              </accessGroupIds>
-                            </backupItem>
-                          </items>
-                        </onlineRepositoriesBackup>`
+                    <items>
+                      <backupItem enabled="true">
+                         <serviioLink>serviio:\/\/video:web?url=`+encodeURIComponent(feedData.feedURL)+`&amp;name=`+encodeURIComponent(mediaSourceName)+`</serviioLink>
+                        <accessGroupIds>
+                          <id>1</id>
+                        </accessGroupIds>
+                      </backupItem>
+                    </items>
+                  </onlineRepositoriesBackup>`
               }
             })
         }

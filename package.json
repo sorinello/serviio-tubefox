@@ -2,7 +2,7 @@
   "title": "Serviio TubeFox",
   "name": "serviio-tubefox",
   "icon": "resource://serviio-tubefox/data/img/icon-serviio.png",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Send Youtube feeds to Serviio DLNA directly from Firefox !\n\nServiio is a free media server. It allows you to stream your media files (music, video or images) to renderer devices (e.g. a TV set, Bluray player, games console or mobile phone) on your connected home network.\n\nRequirements\n-Serviio DLNA Server version 1.6 or above (http://www.serviio.org)\n-Serviio Youtube Plugin version 4 or above (http://forum.serviio.org/viewtopic.php?f=20&t=3276)\n\nHow to use\n-Install the extension\n-Navigate on your favourite Youtube channel\n-You will see the Serviio icon on the pages that contain videos\n\t-\"Videos\" tab of the channel\n\t-Specific playlist page. This is NOT the \"Playlist\" tab. See screenshots.\n-Click on the Serviio yellow icon. The icon should change its background color to green, indicating that the feed has been successfully added\n-If the background color of the Serviio button becomes red, hover over it to see the error message\n\nAdditional configuration\n-By default, the extension assumes that you have Serviio installed on the same computer you are using the extension from\n-If you want to send Youtube feeds to a remote Serviio server, go to the addon preferences and set Serviio URL to point to it. Make sure that the server is accessible from your current location.\n\nPossible problems\n-Error: Invalid Serviio URL\n-Solution: Go to the extension preferences and make sure that the Serviio URL is valid (i.e http://localhost:23423)\n\n-Error: Serviio is not running or the URL is incorrect\n-Solution: Make sure that Serviio service/process is running and accessible\n\n-Error: Youtube plugin not found\n-Solution: Make sure you have the Youtube plugin installed. Version 4 or above is required. See more on http://forum.serviio.org/viewtopic.php?f=20&t=3276\n\n-Error: Serviio DLNA did not accept the feed.\n-Solution: It means that Serviio did reject the feed URL. This should not happen. If it does, please open a ticket on the addon's Github page including also the Youtube video/playlist causing the issue.\n\n-Some of the videos/playlists I have added do not show up on my TV.\n-Solution: Some videos are copyright protected and they use an encrypted signature. The Serviio Youtube plugin is unable to index those videos. For more details, check serviio.log\n\nFor bugs or problems, please report them on: https://github.com/sorinello/serviio-tubefox/issues\n\nNOTE: This is a 3rd party addon and is not affiliated with the creators of Serviio DLNA.",
   "homepage": "https://github.com/sorinello/serviio-tubefox",
   "main": "index.js",
@@ -20,5 +20,8 @@
     "description": "URL to Serviio DLNA Server, must also include the port number. Make sure that port is open on the server machine.\nExample: http://localhost:23423\nExample: http://192.168.0.2:23423\nExample: http://mydomain.com:23423",
     "type": "string",
     "value": "http://localhost:23423"
-  }]
+  }],
+  "permissions": {
+    "multiprocess": true
+  }
 }
